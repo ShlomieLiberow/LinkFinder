@@ -386,7 +386,7 @@ if __name__ == "__main__":
                     continue
 
         if args.output == 'cli':
-            cli_output(endpoints, url)
+            cli_output(endpoints)
         else:
             output += '''
                 <h1>File: <a href="%s" target="_blank" rel="nofollow noopener noreferrer">%s</a></h1>
