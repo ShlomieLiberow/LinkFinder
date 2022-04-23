@@ -278,7 +278,7 @@ def html_save(html):
 
 def check_url(url):
     nopelist = ["node_modules", "jquery.js"]
-    if url[-3:] == ".js":
+    if urlparse(url).path.lower().endswith(".js"):
         words = url.split("/")
         for word in words:
             if word in nopelist:
