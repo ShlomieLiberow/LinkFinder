@@ -6,6 +6,8 @@
 
 # Fix webbrowser bug for MacOS
 import os
+from urllib.parse import urlparse
+
 os.environ["BROWSER"] = "open"
 
 import re
@@ -32,11 +34,12 @@ from string import Template
 
 try:
     from StringIO import StringIO
+
     readBytesCustom = StringIO
 except ImportError:
     from io import BytesIO
-    readBytesCustom = BytesIO
 
+    readBytesCustom = BytesIO
 
 # Regex used
 regex_str = r"""
@@ -82,6 +85,7 @@ regex_str = r"""
 
 context_delimiter_str = "\n"
 
+
 def parser_error(errmsg):
     '''
     Error Messages
@@ -111,7 +115,8 @@ def parser_input(input):
         items = xml.etree.ElementTree.fromstring(open(args.input, "r").read())
 
         for item in items:
-            jsfiles.append({"js":base64.b64decode(item.find('response').text).decode('utf-8',"replace"), "url":item.find('url').text})
+            jsfiles.append({"js": base64.b64decode(item.find('response').text).decode('utf-8', "replace"),
+                            "url": item.find('url').text})
         return jsfiles
 
     # Method 4 - Folder with a wildcard
@@ -134,24 +139,25 @@ def send_request(url):
     '''
 
     # set headers and cookies
-    headers = {}
     default_headers = {
-        'User-Agent'      : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-        'Accept'          : 'text/html, application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language' : 'en-US,en;q=0.8',
-        'Accept-Encoding' : 'gzip'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+        'Accept': 'text/html, application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Accept-Encoding': 'gzip'
     }
 
     try:
         resp = requests.get(
-            url = url,
-            verify = False,
-            headers = headers,
+            url=url,
+            verify=False,
+            headers=default_headers,
+            timeout=default_timeout
         )
-        return resp.content.decode('utf-8','replace')
+        return resp.content.decode('utf-8', 'replace')
     except Exception as err:
         print(err)
         sys.exit(0)
+
 
 def getContext(list_matches, content, include_delimiter=0, context_delimiter_str="\n"):
     '''
@@ -189,6 +195,7 @@ def getContext(list_matches, content, include_delimiter=0, context_delimiter_str
 
     return items
 
+
 def parser_file(content, regex_str, mode=1, more_regex=None, no_dup=1):
     '''
     Parse Input
@@ -206,7 +213,7 @@ def parser_file(content, regex_str, mode=1, more_regex=None, no_dup=1):
     if mode == 1:
         # Beautify
         if len(content) > 1000000:
-            content = content.replace(";",";\r\n").replace(",",",\r\n")
+            content = content.replace(";", ";\r\n").replace(",", ",\r\n")
         else:
             content = jsbeautifier.beautify(content)
 
@@ -240,6 +247,7 @@ def parser_file(content, regex_str, mode=1, more_regex=None, no_dup=1):
 
     return filtered_items
 
+
 def cli_output(endpoints, url=None):
     '''
     Output to CLI
@@ -249,6 +257,7 @@ def cli_output(endpoints, url=None):
             print("[{}]".format(url), end=' ')
         print(html.escape(endpoint["link"]).encode(
             'ascii', 'ignore').decode('utf8'))
+
 
 def html_save(html):
     '''
@@ -276,6 +285,7 @@ def html_save(html):
     finally:
         os.dup2(hide, 1)
 
+
 def check_url(url):
     nopelist = ["node_modules", "jquery.js"]
     if urlparse(url).path.lower().endswith(".js"):
@@ -293,6 +303,7 @@ def check_url(url):
         return url
     else:
         return False
+
 
 if __name__ == "__main__":
     # Parse command line
@@ -320,7 +331,8 @@ if __name__ == "__main__":
                         action="store", default="")
     default_timeout = 10
     parser.add_argument("-t", "--timeout",
-                        help="How many seconds to wait for the server to send data before giving up (default: " + str(default_timeout) + " seconds)",
+                        help="How many seconds to wait for the server to send data before giving up (default: " + str(
+                            default_timeout) + " seconds)",
                         default=default_timeout, type=int, metavar="<seconds>")
     args = parser.parse_args()
 
